@@ -44,23 +44,48 @@ Immune_All_Low: This is the default high-resolution model. It is trained on a co
 Alsinet: https://www.nature.com/articles/s41467-022-30557-4 Robust temporal map of human in vitro myelopoiesis using single-cell genomics
 FBMA: https://www.nature.com/articles/s41586-021-03929-x Blood and immune development in human fetal bone marrow and Down syndrome
 
-Requirements
-R Packages
-Seurat (v4 or v5)
+# Pipeline
 
-Signac
+--------------> Path backed up: /group/soranzo/manuel.tardaguila/2026_Ditadi_test/
 
-scDblFinder
+-------------- Path in scratch: /scratch/manuel.tardaguila/2026_Ditadi_test
 
-patchwork
 
-optparse
 
-Python Environment
-Scanpy
+# 1. cellranger mapping and counts
 
-CellTypist
 
-anndata
+$ sbatch ~/Scripts/sbatch/13_Cell_ranger_count_for_GEX_libraries.sh /scratch/manuel.tardaguila/2026_Ditadi_test MCO_01381_3GEX /group/soranzo/manuel.tardagu\
+ila/2026_Ditadi_test/fastq_raw/
 
-rpy2 (for object conversion)
+# 2. cellbender correction
+
+$ sbatch ~/Scripts/sbatch/7_CellBender_v_scratch.sh /scratch/manuel.tardaguila/2026_Ditadi_test/ MCO_01381_3GEX
+
+
+# 3. Seurat First pass
+
+$ bash ~/Scripts/Wraper_scripts/188_Seurat_First_pass_only_scRNAseq_v_Ditadi_test.sh /scratch/manuel.tardaguila/2026_Ditadi_test/ processing_outputs
+
+
+# 4. Seurat Second pass
+
+$ bash ~/Scripts/Wraper_scripts/189_Seurat_Second_pass_only_scRNAseq_v_Ditadi_test.sh /scratch/manuel.tardaguila/2026_Ditadi_test/
+
+# 5. Merge samples in 1 object
+
+$ bash ~/Scripts/Wraper_scripts/190_Seurat_merge_samples_only_scRNAseq_v_Ditadi_test.sh /scratch/manuel.tardaguila/2026_Ditadi_test/ processing_outputs
+
+# 6. QC
+
+----> Jupyter notebook: Final_QC_in_the_merged_object.ipynb
+
+# 7. Recluster and export h5ad for Cell typist
+
+$ bash ~/Scripts/Wraper_scripts/191_Recluster_at_low_res_and_export_h5ad.sh /scratch/manuel.tardaguila/2026_Ditadi_test/ processing_outputs
+
+# 8. Cell typist prediction
+
+----> Jupyter notebook: Cell_Typist_triple_prediction_cell_identity.ipynb
+----> Jupyter notebook: mapping_cell_types.ipynb
+
