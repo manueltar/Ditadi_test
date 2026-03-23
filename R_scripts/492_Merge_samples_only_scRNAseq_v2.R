@@ -112,18 +112,11 @@ merge_and_filter_doublets = function(option_list)
     cat(sprintf(as.character(sample_array_sel)))
     cat("\n")
     
-    if(sample_array_sel == 'MCO_01381_3GEX'){
-      
-      path_processing_outputs = paste(out,sample_array_sel,'/',sep='')
-      
-      Diff<-'Diff_Ditadi_wt'
-      
-      
-    }else{
-      
-     # Do nothing
-      
-    }#sample_array_sel == 'MCO_01381_3GEX'
+    Diff<-'Diff_Ditadi_wt'
+    
+    path_processing_outputs = paste(out,sample_array_sel,'/',sep='')
+    
+  
     
     
     if (file.exists(path_processing_outputs)){
@@ -159,7 +152,9 @@ merge_and_filter_doublets = function(option_list)
     DefaultAssay(adatas[[sample_array_sel]]) <- "RNA"
 
     
-    
+    cat("Number of cells:\t") 
+    cat(sprintf(as.character(dim(adata@meta.data)[1])))
+    cat("\n")
    
     
   }#i in 1:length(sample_array)

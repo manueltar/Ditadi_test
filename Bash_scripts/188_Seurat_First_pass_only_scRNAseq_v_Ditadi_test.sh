@@ -18,7 +18,8 @@ mkdir -p $Log_files
 
 conda activate multiome_QC_DEF
 
-sample_array=$(echo 'MCO_01381_3GEX')
+sample_array=$(echo 'MCO_01381_3GEX,MCO_01382_3GEX')
+
 
 a=($(echo "$sample_array" | tr "," '\n'))
 

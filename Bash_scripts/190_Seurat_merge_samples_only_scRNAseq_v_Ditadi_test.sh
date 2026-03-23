@@ -18,7 +18,7 @@ Log_files=$(echo "$output_dir""/""Log_files/")
 conda activate multiome_QC_DEF
 
 
-sample_array=$(echo 'MCO_01381_3GEX')
+sample_array=$(echo 'MCO_01381_3GEX,MCO_01382_3GEX')
  
 ### Merge_pre_merged_per_sample
 
@@ -32,8 +32,8 @@ name_Merge_pre_merged_per_sample=$(echo "$type""_job")
 Rscript_Merge_pre_merged_per_sample=$(echo "$Rscripts_path""492_Merge_samples_only_scRNAseq_v2.R")
 
 
-mem=$(echo "4096")
-processors=$(echo "8")
+mem=$(echo "8192")
+processors=$(echo "10")
 total_memory=$(( mem * processors ))
 
 echo "$processors"
@@ -58,7 +58,7 @@ Rscript_cluster_merged_object=$(echo "$Rscripts_path""493_Clustering_of_merged_s
 
 filtered_db_object=$(echo "$output_dir""merged_unprocessed_db_filt.rds")
 
-mem=$(echo "4096")
+mem=$(echo "8192")
 processors=$(echo "10")
 total_memory=$(( mem * processors ))
 
@@ -68,8 +68,8 @@ echo "$total_memory"
 
 # --dependency=afterany:$myjobid_Merge_pre_merged_per_sample
  
-myjobid_cluster_merged_object=$(sbatch --dependency=afterany:$myjobid_Merge_pre_merged_per_sample --job-name $name_cluster_merged_object --output=$outfile_cluster_merged_object --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=$processors --mem-per-cpu=$mem --parsable --wrap="Rscript $Rscript_cluster_merged_object --filtered_db_object $filtered_db_object --processors $processors --total_memory $total_memory --type $type --out $output_dir")
-myjobid_seff_cluster_merged_object=$(sbatch --dependency=afterany:$myjobid_cluster_merged_object --open-mode=append --output=$outfile_cluster_merged_object --job-name="seff" --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_cluster_merged_object >> $outfile_cluster_merged_object")
+myjobid_cluster_merged_object=$(sbatch --dependency=afterok:$myjobid_Merge_pre_merged_per_sample --job-name $name_cluster_merged_object --output=$outfile_cluster_merged_object --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=$processors --mem-per-cpu=$mem --parsable --wrap="Rscript $Rscript_cluster_merged_object --filtered_db_object $filtered_db_object --processors $processors --total_memory $total_memory --type $type --out $output_dir")
+myjobid_seff_cluster_merged_object=$(sbatch --dependency=afterok:$myjobid_cluster_merged_object --open-mode=append --output=$outfile_cluster_merged_object --job-name="seff" --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_cluster_merged_object >> $outfile_cluster_merged_object")
 
 
 conda deactivate

@@ -36,8 +36,8 @@ name_Recluster=$(echo "$type""_job")
 Rscript_Recluster=$(echo "$Rscripts_path""494_merged_clustering_at_low_res.R")
 
 db_filt_clustered_QCed=$(echo "$output_dir""merged_unprocessed_db_filt_clustered_QCed.rds")
-mem=$(echo "8192")
-processors=$(echo "10")
+mem=$(echo "4096")
+processors=$(echo "8")
 total_memory=$(( mem * processors ))
 
 echo "$processors"
@@ -61,7 +61,7 @@ Rscript_Export_RNA_corrected_unnormalized=$(echo "$Rscripts_path""513_Export_RNA
 
 Seurat_object=$(echo "$output_dir""merged_unprocessed_db_filt_clustered_QCed_reclustered.rds")
 mem=$(echo "4096")
-processors=$(echo "8")
+processors=$(echo "2")
 total_memory=$(( mem * processors ))
 
 echo "$processors"
@@ -69,8 +69,8 @@ echo "$total_memory"
 
 #  --dependency=afterany:$myjobid_Recluster
  
-myjobid_Export_RNA_corrected_unnormalized=$(sbatch --dependency=afterok:$myjobid_Recluster --job-name $name_Export_RNA_corrected_unnormalized --output=$outfile_Export_RNA_corrected_unnormalized --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=$processors --mem-per-cpu=$mem --parsable --wrap="Rscript $Rscript_Export_RNA_corrected_unnormalized --Seurat_object $Seurat_object --processors $processors --total_memory $total_memory --type $type --out $output_dir")
-myjobid_seff_Export_RNA_corrected_unnormalized=$(sbatch --dependency=afterok:$myjobid_Export_RNA_corrected_unnormalized --open-mode=append --output=$outfile_Export_RNA_corrected_unnormalized --job-name="seff" --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_Export_RNA_corrected_unnormalized >> $outfile_Export_RNA_corrected_unnormalized")
+myjobid_Export_RNA_corrected_unnormalized=$(sbatch --dependency=afterany:$myjobid_Recluster --job-name $name_Export_RNA_corrected_unnormalized --output=$outfile_Export_RNA_corrected_unnormalized --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=$processors --mem-per-cpu=$mem --parsable --wrap="Rscript $Rscript_Export_RNA_corrected_unnormalized --Seurat_object $Seurat_object --processors $processors --total_memory $total_memory --type $type --out $output_dir")
+myjobid_seff_Export_RNA_corrected_unnormalized=$(sbatch --dependency=afterany:$myjobid_Export_RNA_corrected_unnormalized --open-mode=append --output=$outfile_Export_RNA_corrected_unnormalized --job-name="seff" --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_Export_RNA_corrected_unnormalized >> $outfile_Export_RNA_corrected_unnormalized")
 
 conda deactivate
  
@@ -93,15 +93,15 @@ matrix_file=$(echo "$output_dir""final_rna_corrected_unormalized_matrix.rds")
 output_name=$(echo "merged_unprocessed_db_filt_clustered_QCed_reclustered_rna_corrected_unormalized.h5ad")
 
 mem=$(echo "4096")
-processors=$(echo "4")
+processors=$(echo "1")
 total_memory=$(( mem * processors ))
 
 echo "$processors"
 echo "$total_memory"
 
 
-myjobid_convert_to_h5ad=$(sbatch --dependency=afterok:$myjobid_Export_RNA_corrected_unnormalized --job-name $name_convert_to_h5ad --output=$outfile_convert_to_h5ad --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=$processors --mem-per-cpu=$mem --parsable --wrap="python $Pythonscript_convert_to_h5ad --matrix-file $matrix_file --metadata-file $metadata_file --output-name $output_name --cores $processors --memory $total_memory --output-dir $output_dir")
-myjobid_seff_convert_to_h5ad=$(sbatch --dependency=afterok:$myjobid_convert_to_h5ad --open-mode=append --output=$outfile_convert_to_h5ad --job-name="seff" --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_convert_to_h5ad >> $outfile_convert_to_h5ad")
+myjobid_convert_to_h5ad=$(sbatch --dependency=afterany:$myjobid_Export_RNA_corrected_unnormalized --job-name $name_convert_to_h5ad --output=$outfile_convert_to_h5ad --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=$processors --mem-per-cpu=$mem --parsable --wrap="python $Pythonscript_convert_to_h5ad --matrix-file $matrix_file --metadata-file $metadata_file --output-name $output_name --cores $processors --memory $total_memory --output-dir $output_dir")
+myjobid_seff_convert_to_h5ad=$(sbatch --dependency=afterany:$myjobid_convert_to_h5ad --open-mode=append --output=$outfile_convert_to_h5ad --job-name="seff" --partition=cpuq --time=24:00:00 --nodes=1 --ntasks-per-node=1 --mem-per-cpu=128M --parsable --wrap="seff $myjobid_convert_to_h5ad >> $outfile_convert_to_h5ad")
 
 conda deactivate
 

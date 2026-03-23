@@ -7,7 +7,7 @@ Rscripts_path=$(echo "/home/manuel.tardaguila/Scripts/R/")
 
 conda activate multiome_QC_DEF
 
-sample_array=$(echo 'MCO_01381_3GEX')
+sample_array=$(echo 'MCO_01381_3GEX,MCO_01382_3GEX')
 
 
 MASTER_ROUTE=$1
